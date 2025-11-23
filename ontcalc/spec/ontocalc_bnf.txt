@@ -1,0 +1,46 @@
+OntoCalc DSL - BNF (excerpt)
+-----------------------------
+This document defines the OntoCalc DSL core syntax (excerpt) used for describing ontologies,
+instances, mappings and operations (merge/diff/compose/compute/check).
+
+BNF (simplified)
+<program>       ::= <statement>*
+<statement>     ::= <module> | <schema> | <instance> | <command> | <comment>
+<comment>       ::= "#" <anytext> NEWLINE
+
+<module>        ::= "module" ID "{" ("import" ID ";")* "}"
+<schema>        ::= "schema" ID "{" <decl>* "}"
+<decl>          ::= ("class" ID ";")
+                  | ("prop" ID ":" <type> ";")
+                  | ("axiom" STRING ";")
+
+<instance>      ::= "instance" ID "{" <inst-triple>* "}"
+<inst-triple>   ::= ID "." | ID "-" PROP "->" VALUE ";"
+
+<command>       ::= <map_cmd> | <merge_cmd> | <diff_cmd> | <compose_cmd> | <compute_cmd> | <check_cmd> | <commit_cmd>
+
+<map_cmd>       ::= "map" ID "." ID "->" ID "." ID "(" "confidence" "=" FLOAT ")" ";"
+<merge_cmd>     ::= "merge" ID "," ID "as" ID "using" "policy" ID ";" 
+<diff_cmd>      ::= "diff" ID "minus" ID "as" ID ";"
+<compose_cmd>   ::= "compose" ID "," ID "via" ID "as" ID ";"
+<compute_cmd>   ::= "compute" ID "." ID "." ID "using" "formula" STRING ";" 
+<check_cmd>     ::= "check-consistency" ID ";" | "run-sparql" STRING ";" 
+<commit_cmd>    ::= "commit" ID "as" STRING "by" STRING ";"
+
+Lexical:
+ID              ::= [A-Za-z_][A-Za-z0-9_\-]*
+VALUE           ::= literal or ID reference (strings, numbers, dates)
+FLOAT           ::= decimal number (e.g. 0.95)
+STRING          ::= double-quoted text
+
+Design notes:
+- The DSL is intentionally small and declarative.
+- `schema` declares classes and properties with optional typed units.
+- `instance` declares concrete nodes/triples.
+- `map` creates a mapping candidate; must be approved by `approve-mapping` or policy rules.
+- `merge` performs the coequalizer/pushout-style merge according to mappings and policy.
+- `compute` runs arithmetic expressions safely (only arithmetic, no arbitrary code).
+- `check-consistency` runs internal checks and optionally calls external reasoner (via wrapper).
+- Provenance is recorded for all operations.
+
+The full reference manual includes examples and the recommended policy keywords (keep-A-on-conflict, keep-B-on-conflict, union-props, prefer-right, prefer-left).

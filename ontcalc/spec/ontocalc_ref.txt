@@ -1,0 +1,43 @@
+OntoCalc Reference Manual (abridged)
+===================================
+
+Overview
+--------
+OntoCalc is a small DSL and execution model for mechanical ontology operations:
+- map: declare correspondences between terms
+- merge: combine graphs using approved mappings
+- diff: remove parts of a graph
+- compose: bind via common interface
+- compute: numeric computations with provenance
+- check-consistency/run-sparql: verification steps
+- commit: persist merged graph with provenance
+
+Core Types
+----------
+- Class
+- Property(domain, range, unit?)
+- Instance (Node with properties)
+- Mapping (A.term -> B.term with confidence, evidence)
+- Graph (nodes, edges, provenance)
+
+Policies (examples)
+-------------------
+- keep-A-on-conflict: prefer left graph values when property conflicts
+- keep-B-on-conflict: prefer right graph values
+- union-props: keep union of property values
+- prefer-most-recent: use timestamp provenance to pick
+
+Provenance model
+----------------
+Every change produces a provenance record:
+{ "op": "merge", "who": "...", "when": "...", "inputs": [...], "policy": "...", "notes": "..." }
+
+Safety & Determinism
+--------------------
+- compute formula language is limited to arithmetic (+,-,*,/,pow,min,max), safe evaluation only.
+- SPARQL execution is delegated to configured triplestore (or local sparql engine).
+- LLMs are only allowed to suggest mapping candidates; acceptance requires policy or manual approval.
+
+Examples
+--------
+(see examples/ghg_ontocalc.onto in package)

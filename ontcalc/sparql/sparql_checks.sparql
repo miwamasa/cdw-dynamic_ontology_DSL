@@ -1,0 +1,10 @@
+# sparql_checks.sparql
+SELECT ?entry ?batch ?activity ?ef ?em_calc ?em_record WHERE {
+  ?entry a <http://example.org/ghg#EmissionEntry> ;
+         <http://example.org/ghg#sourceFor> ?batch ;
+         <http://example.org/ghg#activity> ?activity ;
+         <http://example.org/ghg#emissionFactor> ?ef ;
+         <http://example.org/ghg#emissions> ?em_record .
+  BIND(xsd:decimal(?activity) * xsd:decimal(?ef) AS ?em_calc)
+  FILTER(abs(xsd:decimal(?em_calc) - xsd:decimal(?em_record)) > 0.001)
+}

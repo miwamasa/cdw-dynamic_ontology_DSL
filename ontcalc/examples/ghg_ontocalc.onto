@@ -1,0 +1,63 @@
+# GHG example using OntoCalc DSL
+module GHGDemo {
+  import FactoryModule;
+  import EmissionModule;
+}
+
+schema FactoryModule {
+  class Factory;
+  class ProductionBatch;
+  class Product;
+  prop produces : Factory -> ProductionBatch;
+  prop batchOf : ProductionBatch -> Product;
+  prop quantity : ProductionBatch -> Decimal(unit="count");
+  prop timestamp : ProductionBatch -> DateTime;
+}
+
+schema EmissionModule {
+  class EmissionReport;
+  class EmissionEntry;
+  prop sourceFor : EmissionEntry -> ProductionBatch;
+  prop activity : EmissionEntry -> Decimal(unit="count");
+  prop emissionFactor : EmissionEntry -> Decimal(unit="kgCO2e_per_unit");
+  prop emissions : EmissionEntry -> Decimal(unit="kgCO2e");
+}
+
+instance FactoryData {
+  ProductionBatch Batch_2025_11_01 {
+    batchOf = WidgetX;
+    quantity = 1000;
+    timestamp = "2025-11-01T08:00:00";
+  }
+  Factory F1 { produces = Batch_2025_11_01; }
+}
+
+instance EmissionData {
+  EmissionEntry Entry_1 {
+    sourceFor = Batch_2025_11_01;
+    activity = 1000;
+    emissionFactor = 0.75;
+    emissions = ?;  # unknown -> compute
+  }
+  EmissionReport R1 { hasSource = Entry_1; }
+}
+
+# Mapping suggestions (would normally be proposed by a mapper/LLM)
+map FactoryModule.ProductionBatch -> EmissionModule.EmissionEntry (confidence=0.92);
+map FactoryModule.quantity -> EmissionModule.activity (confidence=0.98);
+
+# Approve mappings per policy
+approve-mapping all where confidence >= 0.9;
+
+# Merge factory and emission data to M using simple merge-policy
+merge FactoryData, EmissionData as M using policy merge-policy;
+
+# Compute emissions for Entry_1
+compute M.EmissionEntry.Entry_1.emissions using formula "activity * emissionFactor";
+
+# Run checks
+check-consistency M;
+run-sparql "sparql_checks.sparql";
+
+# Commit
+commit M as "MergedFactory_GHG_2025_11" by "analyst@example.com";
