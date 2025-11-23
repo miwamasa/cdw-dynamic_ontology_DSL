@@ -664,7 +664,7 @@ class AIMapper:
             try:
                 import anthropic
             except ImportError as ie:
-                log_entry['error'] = f"Failed to import anthropic module: {str(ie)}. Install with: pip install anthropic==0.39.0"
+                log_entry['error'] = f"Failed to import anthropic module: {str(ie)}. Install with: pip install 'anthropic>=0.40.0'"
                 log_entry['method'] = 'import_failed_fallback'
                 print(f"Anthropic import failed: {ie}")
                 mappings = self._simple_similarity_mapping(schema_a, schema_b)

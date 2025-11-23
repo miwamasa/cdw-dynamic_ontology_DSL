@@ -181,7 +181,7 @@ if __name__ == '__main__':
     except ImportError:
         print("⚠ Anthropic: NOT INSTALLED")
         print("  AI mapping will use string similarity fallback")
-        print("  To enable AI mapping, run: pip install anthropic==0.39.0")
+        print("  To enable AI mapping, run: pip install 'anthropic>=0.40.0'")
 
     api_key = os.environ.get('ANTHROPIC_API_KEY')
     if api_key:

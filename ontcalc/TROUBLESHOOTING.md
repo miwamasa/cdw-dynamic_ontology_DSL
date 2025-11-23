@@ -13,7 +13,7 @@
 #### Option A: Install anthropic module
 ```bash
 cd ontcalc
-pip install anthropic==0.39.0
+pip install "anthropic>=0.40.0"
 ```
 
 #### Option B: Use the setup script
@@ -85,7 +85,31 @@ source ~/.bashrc  # or ~/.zshrc
 #### Alternative: Pass API key in web UI
 Enter your API key in the "Anthropic API Key" field in the web editor.
 
-### 4. Module Import Cache Issues
+### 4. Anthropic Version Compatibility Error
+
+**Symptoms:**
+- Error: `Client.__init__() got an unexpected keyword argument 'proxies'`
+- AI mapping fails even with anthropic installed
+
+**Cause:**
+Old version of anthropic library (0.39.0 or earlier) is incompatible with the current API.
+
+**Solution:**
+Upgrade to the latest version:
+```bash
+pip install --upgrade "anthropic>=0.40.0"
+
+# Then restart the web server
+python3 web_editor.py
+```
+
+**Verify the version:**
+```bash
+python3 -c "import anthropic; print(anthropic.__version__)"
+# Should show 0.40.0 or higher
+```
+
+### 5. Module Import Cache Issues
 
 **Symptoms:**
 - Changes to Python files not taking effect
@@ -102,7 +126,7 @@ find . -type f -name "*.pyc" -delete 2>/dev/null
 python3 web_editor.py
 ```
 
-### 5. Port 5000 Already in Use
+### 6. Port 5000 Already in Use
 
 **Symptoms:**
 - Error: `Address already in use`
@@ -125,7 +149,7 @@ Edit `web_editor.py` line 156:
 app.run(debug=True, host='0.0.0.0', port=5001)  # Changed from 5000 to 5001
 ```
 
-### 6. Permission Denied Errors
+### 7. Permission Denied Errors
 
 **Symptoms:**
 - Can't execute `./setup.sh`
@@ -137,7 +161,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-### 7. Compute Path Errors
+### 8. Compute Path Errors
 
 **Symptoms:**
 - `Node 'X' not found in graph 'Y'`
@@ -163,7 +187,7 @@ compute EmissionData.Entry_1.emissions using formula "activity * emissionFactor"
 merge FactoryData, EmissionData as M using policy merge-policy;
 ```
 
-### 8. Missing Dependencies
+### 9. Missing Dependencies
 
 **Symptoms:**
 - Various import errors
@@ -176,7 +200,7 @@ cd ontcalc
 pip install -r requirements.txt --force-reinstall
 ```
 
-### 9. Getting Help
+### 10. Getting Help
 
 If you're still experiencing issues:
 
@@ -185,7 +209,7 @@ If you're still experiencing issues:
 3. **Review the examples** - `examples/toy_example.onto` and `examples/ghg_ontocalc.onto`
 4. **Read the documentation** - `README.md` and `spec/ontocalc_bnf.txt`
 
-### 10. Quick Diagnosis Script
+### 11. Quick Diagnosis Script
 
 Run this to check your environment:
 ```bash
@@ -204,6 +228,8 @@ except ImportError:
 try:
     import anthropic
     print(f"✓ Anthropic: {anthropic.__version__}")
+    if hasattr(anthropic, '__version__') and anthropic.__version__ < '0.40.0':
+        print(f"⚠ Warning: anthropic {anthropic.__version__} is outdated. Upgrade with: pip install --upgrade 'anthropic>=0.40.0'")
 except ImportError:
     print("✗ Anthropic: NOT INSTALLED")
 
