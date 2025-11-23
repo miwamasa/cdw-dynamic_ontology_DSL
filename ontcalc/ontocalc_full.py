@@ -634,12 +634,30 @@ class AIMapper:
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
+        self.ai_logs = []  # Track all AI interactions
 
     def suggest_mappings(self, schema_a: SchemaNode, schema_b: SchemaNode) -> List[Tuple[str, str, float]]:
         """Suggest mappings between two schemas using AI"""
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'operation': 'suggest_mappings',
+            'schema_a': schema_a.name,
+            'schema_b': schema_b.name,
+            'method': 'ai' if self.api_key else 'fallback',
+            'prompt': None,
+            'response': None,
+            'error': None,
+            'mappings_count': 0
+        }
+
         if not self.api_key:
             # Fallback to simple string similarity
-            return self._simple_similarity_mapping(schema_a, schema_b)
+            log_entry['method'] = 'string_similarity_fallback'
+            log_entry['response'] = 'No API key provided, using string similarity'
+            mappings = self._simple_similarity_mapping(schema_a, schema_b)
+            log_entry['mappings_count'] = len(mappings)
+            self.ai_logs.append(log_entry)
+            return mappings
 
         # Use Claude API for intelligent mapping
         try:
@@ -663,6 +681,7 @@ For each potential mapping, provide:
 Format your response as JSON:
 {{"mappings": [{{"from": "A.term", "to": "B.term", "confidence": 0.95, "rationale": "..."}}]}}
 """
+            log_entry['prompt'] = prompt
 
             message = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
@@ -671,6 +690,13 @@ Format your response as JSON:
             )
 
             response_text = message.content[0].text
+            log_entry['response'] = response_text
+            log_entry['model'] = 'claude-3-5-sonnet-20241022'
+            log_entry['tokens_used'] = {
+                'input': message.usage.input_tokens,
+                'output': message.usage.output_tokens
+            }
+
             # Extract JSON from response
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
@@ -678,12 +704,23 @@ Format your response as JSON:
                 mappings = []
                 for m in result.get('mappings', []):
                     mappings.append((m['from'], m['to'], m['confidence']))
+                log_entry['mappings_count'] = len(mappings)
+                log_entry['parsed_mappings'] = result.get('mappings', [])
+                self.ai_logs.append(log_entry)
                 return mappings
         except Exception as e:
+            log_entry['error'] = str(e)
+            log_entry['method'] = 'ai_failed_fallback'
             print(f"AI mapping failed, using fallback: {e}")
-            return self._simple_similarity_mapping(schema_a, schema_b)
+            mappings = self._simple_similarity_mapping(schema_a, schema_b)
+            log_entry['mappings_count'] = len(mappings)
+            self.ai_logs.append(log_entry)
+            return mappings
 
-        return self._simple_similarity_mapping(schema_a, schema_b)
+        mappings = self._simple_similarity_mapping(schema_a, schema_b)
+        log_entry['mappings_count'] = len(mappings)
+        self.ai_logs.append(log_entry)
+        return mappings
 
     def _format_schema(self, schema: SchemaNode) -> str:
         lines = []

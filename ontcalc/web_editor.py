@@ -48,6 +48,7 @@ def execute_script():
                 'list': executor.approved
             },
             'provenance': executor.provenance_log,
+            'ai_logs': ai_mapper.ai_logs,  # Include AI interaction logs
             'tokens_count': len(tokens) - 1  # Exclude EOF
         }
 
