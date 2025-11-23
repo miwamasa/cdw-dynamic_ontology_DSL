@@ -92,6 +92,10 @@ def validate_script():
 @app.route('/api/examples')
 def get_examples():
     """Return example scripts"""
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    examples_dir = os.path.join(script_dir, 'examples')
+
     examples = {
         'toy_example': {
             'name': 'Toy Example: Animals and Pets',
@@ -134,13 +138,21 @@ approve-mapping all where confidence >= 0.85;
 
 transfer AnimalData from AnimalOntology to PetOntology as PetData;
 '''
-        },
-        'ghg_example': {
-            'name': 'GHG Example: Production to Emissions',
-            'description': 'Factory production data to GHG emission reports',
-            'script': open('/home/user/cdw-dynamic_ontology_DSL/ontcalc/examples/ghg_ontocalc.onto', 'r').read()
         }
     }
+
+    # Try to load GHG example from file
+    ghg_file = os.path.join(examples_dir, 'ghg_ontocalc.onto')
+    try:
+        if os.path.exists(ghg_file):
+            with open(ghg_file, 'r') as f:
+                examples['ghg_example'] = {
+                    'name': 'GHG Example: Production to Emissions',
+                    'description': 'Factory production data to GHG emission reports',
+                    'script': f.read()
+                }
+    except Exception as e:
+        print(f"Warning: Could not load GHG example: {e}")
 
     return jsonify(examples)
 
