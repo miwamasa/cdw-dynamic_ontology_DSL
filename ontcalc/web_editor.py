@@ -158,4 +158,41 @@ transfer AnimalData from AnimalOntology to PetOntology as PetData;
     return jsonify(examples)
 
 if __name__ == '__main__':
+    print("=" * 60)
+    print("🔮 OntoCalc Web Editor Starting...")
+    print("=" * 60)
+
+    # Check dependencies
+    import sys
+    print(f"Python: {sys.version}")
+    print(f"Python Path: {sys.executable}")
+
+    try:
+        import flask
+        print(f"✓ Flask: {flask.__version__}")
+    except ImportError:
+        print("✗ Flask: NOT INSTALLED")
+        print("  Run: pip install Flask==3.0.0")
+        sys.exit(1)
+
+    try:
+        import anthropic
+        print(f"✓ Anthropic: {anthropic.__version__}")
+    except ImportError:
+        print("⚠ Anthropic: NOT INSTALLED")
+        print("  AI mapping will use string similarity fallback")
+        print("  To enable AI mapping, run: pip install anthropic==0.39.0")
+
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if api_key:
+        print(f"✓ API Key: Configured (length: {len(api_key)})")
+    else:
+        print("○ API Key: Not set (using fallback mode)")
+        print("  To enable AI mapping, set: export ANTHROPIC_API_KEY='your-key'")
+
+    print("=" * 60)
+    print("Starting server on http://0.0.0.0:5000")
+    print("Press Ctrl+C to stop")
+    print("=" * 60)
+
     app.run(debug=True, host='0.0.0.0', port=5000)
