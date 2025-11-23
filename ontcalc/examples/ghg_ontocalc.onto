@@ -49,15 +49,12 @@ map FactoryModule.quantity -> EmissionModule.activity (confidence=0.98);
 # Approve mappings per policy
 approve-mapping all where confidence >= 0.9;
 
-# Merge factory and emission data to M using simple merge-policy
+# Method 1: Compute emissions directly in EmissionData before merging
+compute EmissionData.Entry_1.emissions using formula "activity * emissionFactor";
+
+# Method 2: Merge factory and emission data
 merge FactoryData, EmissionData as M using policy merge-policy;
 
-# Compute emissions for Entry_1
-compute M.EmissionEntry.Entry_1.emissions using formula "activity * emissionFactor";
-
-# Run checks
-check-consistency M;
-run-sparql "sparql_checks.sparql";
-
-# Commit
-commit M as "MergedFactory_GHG_2025_11" by "analyst@example.com";
+# Method 3: Transfer - Transform production data to emission format
+# This demonstrates the new transfer operation
+transfer FactoryData from FactoryModule to EmissionModule as TransformedEmissions;

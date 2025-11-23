@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OntoCalc Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .editor-container {
+            grid-column: 1 / -1;
+        }
+
+        #editor {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: #282c34;
+            color: #abb2bf;
+            resize: vertical;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input[type="password"] {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        #output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 2px solid #333;
+        }
+
+        .graph-view {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .node {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .node-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .node-types {
+            color: #764ba2;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .node-prop {
+            margin: 5px 0;
+            padding-left: 15px;
+            border-left: 3px solid #f093fb;
+        }
+
+        .prop-name {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .prop-value {
+            color: #2c5282;
+            margin-left: 10px;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔮 OntoCalc Editor</h1>
+            <p>Dynamic Ontology DSL - Edit, Execute, and Transform Ontologies</p>
+        </header>
+
+        <div class="main-content">
+            <div class="panel editor-container">
+                <h2>📝 Script Editor</h2>
+                <div class="toolbar">
+                    <select id="exampleSelect">
+                        <option value="">-- Load Example --</option>
+                    </select>
+                    <button onclick="executeScript()">▶️ Execute</button>
+                    <button onclick="validateScript()" class="secondary">✓ Validate</button>
+                    <button onclick="clearEditor()" class="secondary">🗑️ Clear</button>
+                    <input type="password" id="apiKey" placeholder="Anthropic API Key (optional)">
+                </div>
+                <textarea id="editor" placeholder="Write your OntoCalc script here..."># OntoCalc Script
+# Write your ontology transformations here
+
+schema ExampleSchema {
+  class Entity;
+  prop name: Entity -> String;
+}
+</textarea>
+            </div>
+
+            <div class="panel">
+                <h2>📊 Execution Results</h2>
+                <div id="status" class="status"></div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Executing script...</p>
+                </div>
+                <div id="stats" class="stats"></div>
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('output')">Console</button>
+                    <button class="tab" onclick="showTab('graphs')">Graphs</button>
+                    <button class="tab" onclick="showTab('provenance')">Provenance</button>
+                </div>
+                <div id="output-tab" class="tab-content active">
+                    <div id="output">No output yet. Click "Execute" to run your script.</div>
+                </div>
+                <div id="graphs-tab" class="tab-content">
+                    <div id="graphView" class="graph-view"></div>
+                </div>
+                <div id="provenance-tab" class="tab-content">
+                    <div id="provenanceView"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResults = null;
+
+        // Load examples on page load
+        window.onload = function() {
+            fetch('/api/examples')
+                .then(r => r.json())
+                .then(examples => {
+                    const select = document.getElementById('exampleSelect');
+                    for (const [key, example] of Object.entries(examples)) {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = example.name;
+                        select.appendChild(option);
+                    }
+                });
+        };
+
+        document.getElementById('exampleSelect').addEventListener('change', function() {
+            const key = this.value;
+            if (!key) return;
+
+            fetch('/api/examples')
+                .then(r => r.json())
+                .then(examples => {
+                    const example = examples[key];
+                    document.getElementById('editor').value = example.script;
+                });
+        });
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function executeScript() {
+            const script = document.getElementById('editor').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+
+            loading.classList.add('active');
+            status.style.display = 'none';
+
+            fetch('/api/execute', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({script: script, api_key: apiKey})
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.remove('active');
+
+                if (data.success) {
+                    currentResults = data;
+                    status.className = 'status success';
+                    status.textContent = '✓ Execution successful!';
+                    status.style.display = 'block';
+
+                    displayResults(data);
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '✗ Execution failed: ' + data.error;
+                    status.style.display = 'block';
+
+                    document.getElementById('output').textContent =
+                        'Error: ' + data.error + '\n\n' + (data.traceback || '');
+                }
+            })
+            .catch(error => {
+                loading.classList.remove('active');
+                status.className = 'status error';
+                status.textContent = '✗ Request failed: ' + error;
+                status.style.display = 'block';
+            });
+        }
+
+        function validateScript() {
+            const script = document.getElementById('editor').value;
+            const status = document.getElementById('status');
+
+            fetch('/api/validate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({script: script})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    status.className = 'status success';
+                    status.textContent = `✓ Script is valid! (${data.tokens_count} tokens, ${data.statements_count} statements)`;
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '✗ Syntax error: ' + data.error;
+                }
+                status.style.display = 'block';
+            });
+        }
+
+        function clearEditor() {
+            if (confirm('Are you sure you want to clear the editor?')) {
+                document.getElementById('editor').value = '';
+                document.getElementById('output').textContent = 'Editor cleared.';
+                document.getElementById('status').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            // Update stats
+            const statsHtml = `
+                <div class="stat-box">
+                    <div class="stat-value">${Object.keys(data.graphs).length}</div>
+                    <div class="stat-label">Graphs</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">${Object.keys(data.schemas).length}</div>
+                    <div class="stat-label">Schemas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">${data.mappings.approved}</div>
+                    <div class="stat-label">Mappings</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">${data.provenance.length}</div>
+                    <div class="stat-label">Operations</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+
+            // Update output
+            document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+
+            // Update graph view
+            displayGraphs(data.graphs);
+
+            // Update provenance
+            displayProvenance(data.provenance);
+        }
+
+        function displayGraphs(graphs) {
+            const container = document.getElementById('graphView');
+            container.innerHTML = '';
+
+            if (Object.keys(graphs).length === 0) {
+                container.innerHTML = '<p style="color: #666;">No graphs generated.</p>';
+                return;
+            }
+
+            for (const [name, graph] of Object.entries(graphs)) {
+                const graphDiv = document.createElement('div');
+                graphDiv.style.marginBottom = '30px';
+
+                let html = `<h3 style="color: #667eea; margin-bottom: 15px;">📊 Graph: ${name}</h3>`;
+
+                for (const [nodeId, node] of Object.entries(graph.nodes)) {
+                    html += `
+                        <div class="node">
+                            <div class="node-header">🔹 ${nodeId}</div>
+                            <div class="node-types">Types: ${node.types.join(', ') || 'none'}</div>
+                            ${Object.entries(node.props).map(([prop, values]) =>
+                                `<div class="node-prop">
+                                    <span class="prop-name">${prop}:</span>
+                                    <span class="prop-value">${values.join(', ')}</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    `;
+                }
+
+                graphDiv.innerHTML = html;
+                container.appendChild(graphDiv);
+            }
+        }
+
+        function displayProvenance(provenance) {
+            const container = document.getElementById('provenanceView');
+            container.innerHTML = '';
+
+            if (provenance.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 20px;">No operations recorded.</p>';
+                return;
+            }
+
+            const html = provenance.map((prov, idx) => `
+                <div class="node" style="margin: 10px 0;">
+                    <div class="node-header">${idx + 1}. ${prov.op.toUpperCase()}</div>
+                    ${Object.entries(prov).filter(([k, v]) => k !== 'op').map(([key, value]) =>
+                        `<div class="node-prop">
+                            <span class="prop-name">${key}:</span>
+                            <span class="prop-value">${typeof value === 'object' ? JSON.stringify(value) : value}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
