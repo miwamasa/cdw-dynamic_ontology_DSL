@@ -684,14 +684,14 @@ Format your response as JSON:
             log_entry['prompt'] = prompt
 
             message = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-haiku-4-5",
                 max_tokens=2000,
                 messages=[{"role": "user", "content": prompt}]
             )
 
             response_text = message.content[0].text
             log_entry['response'] = response_text
-            log_entry['model'] = 'claude-3-5-sonnet-20241022'
+            log_entry['model'] = 'claude-haiku-4-5'
             log_entry['tokens_used'] = {
                 'input': message.usage.input_tokens,
                 'output': message.usage.output_tokens
