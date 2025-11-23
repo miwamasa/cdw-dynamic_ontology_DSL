@@ -42,16 +42,35 @@ cdw-dynamic_ontology_DSL/
 
 ### Installation
 
-1. Install Python dependencies:
+#### Option 1: Automated Setup (Recommended)
+
+```bash
+cd ontcalc
+./setup.sh
+```
+
+The setup script will:
+- Check your Python version
+- Optionally create a virtual environment
+- Install all dependencies (Flask, anthropic)
+- Display usage instructions
+
+#### Option 2: Manual Installation
+
 ```bash
 cd ontcalc
 pip install -r requirements.txt
 ```
 
-2. (Optional) Set up Anthropic API key for AI-assisted mapping:
+### AI Configuration (Optional)
+
+For AI-assisted ontology mapping using Claude Haiku 4.5:
+
 ```bash
 export ANTHROPIC_API_KEY="your-api-key-here"
 ```
+
+**Note**: The system works without an API key using string similarity fallback. With an API key, it uses **Claude Haiku 4.5** for intelligent mapping suggestions with rationale.
 
 ### Running Examples
 
@@ -226,10 +245,18 @@ compute EmissionData.Entry_1.emissions using formula "activity * emissionFactor"
 ### AI Integration
 
 The `AIMapper` class provides:
-- Intelligent mapping suggestions using Claude API
-- Fallback to string similarity when API unavailable
-- Confidence scoring for all suggestions
-- Human-in-the-loop approval workflow
+- **Intelligent mapping suggestions** using Claude Haiku 4.5 API
+- **Detailed logging** of all AI interactions (prompts, responses, tokens)
+- **Automatic fallback** to string similarity when API unavailable
+- **Confidence scoring** for all suggestions with rationale
+- **Human-in-the-loop** approval workflow
+- **Token usage tracking** for cost monitoring
+
+AI logs are fully visible in the web editor's "AI Logs" tab, showing:
+- Complete prompts and responses
+- Token usage statistics
+- Parsed mapping results with confidence scores
+- Error messages and fallback behavior
 
 ## 🔧 Technical Details
 
