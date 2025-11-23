@@ -1,0 +1,73 @@
+# Toy Example: Animal Classification to Pet Registry Transformation
+# This example demonstrates basic ontology operations in an intuitive way
+
+# Define the source ontology: Animal Classification System
+schema AnimalOntology {
+  class Animal;
+  class Mammal;
+  class Bird;
+  prop species: Animal -> String;
+  prop age: Animal -> Decimal;
+  prop habitat: Animal -> String;
+  prop diet: Animal -> String;
+  prop weight: Animal -> Decimal;
+}
+
+# Define the target ontology: Pet Registry System
+schema PetOntology {
+  class Pet;
+  class DomesticAnimal;
+  class Companion;
+  prop petName: Pet -> String;
+  prop age: Pet -> Decimal;
+  prop ownerName: Pet -> String;
+  prop registrationDate: Pet -> String;
+  prop weight: Pet -> Decimal;
+}
+
+# Source data: Animals in a zoo/shelter
+instance AnimalData {
+  Mammal Dog1 {
+    species = "Canis familiaris";
+    age = 3;
+    habitat = "domestic";
+    diet = "omnivore";
+    weight = 25.5;
+  }
+  Mammal Cat1 {
+    species = "Felis catus";
+    age = 2;
+    habitat = "domestic";
+    diet = "carnivore";
+    weight = 4.2;
+  }
+  Bird Parrot1 {
+    species = "Psittacus erithacus";
+    age = 5;
+    habitat = "domestic";
+    diet = "herbivore";
+    weight = 0.4;
+  }
+}
+
+# Create mappings between the two ontologies
+# These mappings define how concepts relate between systems
+map AnimalOntology.Mammal -> PetOntology.Pet (confidence=0.95);
+map AnimalOntology.Bird -> PetOntology.Pet (confidence=0.90);
+map AnimalOntology.age -> PetOntology.age (confidence=1.0);
+map AnimalOntology.weight -> PetOntology.weight (confidence=1.0);
+map AnimalOntology.species -> PetOntology.petName (confidence=0.75);
+
+# Approve mappings with high confidence
+approve-mapping all where confidence >= 0.85;
+
+# Transfer data from Animal ontology to Pet ontology
+# This transformation creates new pet registry entries from animal data
+transfer AnimalData from AnimalOntology to PetOntology as PetData;
+
+# Now we can work with the pet data
+# Let's compute something useful - BMI-like metric for pets
+# (This is just for demonstration - not a real veterinary metric)
+compute PetData.Pet.PetData_Dog1.healthScore using formula "weight / (age + 1)";
+compute PetData.Pet.PetData_Cat1.healthScore using formula "weight / (age + 1)";
+compute PetData.Pet.PetData_Parrot1.healthScore using formula "weight / (age + 1)";
