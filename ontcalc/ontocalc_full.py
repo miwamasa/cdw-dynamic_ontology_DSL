@@ -661,7 +661,17 @@ class AIMapper:
 
         # Use Claude API for intelligent mapping
         try:
-            import anthropic
+            try:
+                import anthropic
+            except ImportError as ie:
+                log_entry['error'] = f"Failed to import anthropic module: {str(ie)}. Install with: pip install anthropic==0.39.0"
+                log_entry['method'] = 'import_failed_fallback'
+                print(f"Anthropic import failed: {ie}")
+                mappings = self._simple_similarity_mapping(schema_a, schema_b)
+                log_entry['mappings_count'] = len(mappings)
+                self.ai_logs.append(log_entry)
+                return mappings
+
             client = anthropic.Anthropic(api_key=self.api_key)
 
             prompt = f"""Given two ontology schemas, suggest mappings between their classes and properties.

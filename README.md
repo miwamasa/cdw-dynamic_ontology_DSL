@@ -342,12 +342,34 @@ Based on category-theoretic foundations described in `related_documents/the_onto
 - Provenance tracking
 - Reproducible transformations
 
+## 🔧 Troubleshooting
+
+Experiencing issues? Check the detailed troubleshooting guide:
+
+📖 **[TROUBLESHOOTING.md](ontcalc/TROUBLESHOOTING.md)**
+
+Common issues covered:
+- "No module named 'anthropic'" errors
+- Web server not refreshing after code changes
+- API key configuration
+- Module import cache issues
+- Port conflicts
+- And more...
+
+Quick diagnosis:
+```bash
+cd ontcalc
+python3 web_editor.py
+# Check the startup messages for any warnings
+```
+
 ## 📞 Support
 
 For issues or questions:
-1. Check the examples in `ontcalc/examples/`
-2. Read the BNF grammar in `spec/ontocalc_bnf.txt`
-3. Review the summary document in `related_documents/`
+1. **Check [TROUBLESHOOTING.md](ontcalc/TROUBLESHOOTING.md)** for common issues
+2. Review the examples in `ontcalc/examples/`
+3. Read the BNF grammar in `spec/ontocalc_bnf.txt`
+4. Check the theoretical foundations in `related_documents/`
 
 ---
 
